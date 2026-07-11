@@ -1840,7 +1840,7 @@ def calculate_daily_2hr_mape_distribution(input_df):
     # Keep the three requested categories
     daily_mape_df["MAPE_Range"] = pd.cut(
         daily_mape_df["Daily_MAPE"],
-        bins=[0, 5, 10, np.inf]
+        bins=[0, 5, 10, np.inf],
         labels=[
             "0–5%",
             ">5–10%",
