@@ -1372,7 +1372,7 @@ else:
             ((actual_all - daily_all) ** 2).mean()
         )
 
-        st.markdown("## 📌 Overall Forecast Performance")
+        st.markdown("## 📑 Overall Forecast Performance")
 
         left_summary, right_summary = st.columns(2)
 
