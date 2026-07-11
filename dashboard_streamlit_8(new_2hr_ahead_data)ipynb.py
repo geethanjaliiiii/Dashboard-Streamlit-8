@@ -1889,73 +1889,110 @@ if not mape_distribution_df.empty:
             "#78909C"   # Slate grey — >10%
         ]
 
-        fig_2hr_mape_distribution = go.Figure()
-
-        fig_2hr_mape_distribution.add_trace(go.Pie(
-            labels=mape_distribution_df["MAPE Range"],
-            values=mape_distribution_df["Number of Days"],
-
-            marker=dict(
-                colors=distribution_colors,
-                line=dict(
-                    color="white",
-                    width=2
-                )
-            ),
-
-            texttemplate=(
-                "<b>%{label}</b><br>"
-                "%{value} days<br>"
-                "%{percent}"
-            ),
-
-            textposition="auto",
-            automargin=True,
-
-            hovertemplate=(
-                "<b>%{label}</b><br>"
-                "Number of days: %{value}<br>"
-                "Percentage: %{percent}"
-                "<extra></extra>"
-            ),
-
-            sort=False,
-            direction="clockwise",
-            pull=[0.02, 0.02, 0.02]
-        ))
-
-        fig_2hr_mape_distribution.update_layout(
-            height=560,
-            showlegend=False,
-        
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=-0.08,
-                xanchor="center",
-                x=0.5,
-                title="MAPE Range"
-            ),
-        
-            margin=dict(
-                l=90,
-                r=90,
-                t=40,
-                b=130
+        total_days = int(
+        mape_distribution_df["Number of Days"].sum()
+    )
+    
+    fig_2hr_mape_distribution = go.Figure()
+    
+    fig_2hr_mape_distribution.add_trace(go.Pie(
+        labels=mape_distribution_df["MAPE Range"],
+        values=mape_distribution_df["Number of Days"],
+    
+        # Donut-style chart
+        hole=0.45,
+    
+        marker=dict(
+            colors=[
+                "#7E57C2",  # Purple
+                "#EC407A",  # Pink
+                "#78909C"   # Slate grey
+            ],
+            line=dict(
+                color="rgba(255,255,255,0.90)",
+                width=3
             )
+        ),
+    
+        texttemplate=(
+            "<b>%{label}</b><br>"
+            "%{value} days<br>"
+            "%{percent:.1%}"
+        ),
+    
+        textposition="inside",
+    
+        insidetextfont=dict(
+            size=15,
+            color="white"
+        ),
+    
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            "Number of days: %{value}<br>"
+            "Share: %{percent:.1%}"
+            "<extra></extra>"
+        ),
+    
+        sort=False,
+        direction="clockwise",
+    
+        # Slightly highlight only the best category
+        pull=[0.04, 0, 0]
+    ))
+    
+    fig_2hr_mape_distribution.update_layout(
+        height=560,
+        showlegend=True,
+    
+        # Text in the centre of the donut
+        annotations=[
+            dict(
+                text=(
+                    f"<b>{total_days}</b><br>"
+                    "<span style='font-size:13px;'>Evaluated days</span>"
+                ),
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+                align="center",
+                font=dict(size=24)
+            )
+        ],
+    
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.06,
+            xanchor="center",
+            x=0.5,
+            title=None,
+            font=dict(size=13)
+        ),
+    
+        margin=dict(
+            l=50,
+            r=50,
+            t=35,
+            b=100
+        ),
+    
+        uniformtext=dict(
+            minsize=11,
+            mode="hide"
         )
-
-        st.plotly_chart(
-            fig_2hr_mape_distribution,
-            width="stretch",
-            key="daily_2hr_mape_distribution_pie",
-            config={
-                "displayModeBar": False,
-                "staticPlot": True,
-                "responsive": True
-            }
-        )
-
+    )
+    
+    st.plotly_chart(
+        fig_2hr_mape_distribution,
+        width="stretch",
+        key="daily_2hr_mape_distribution_donut",
+        config={
+            "displayModeBar": False,
+            "staticPlot": True,
+            "responsive": True
+        }
+    )
 else:
     st.warning(
         "Not enough valid 2-hour-ahead forecast data is available "
