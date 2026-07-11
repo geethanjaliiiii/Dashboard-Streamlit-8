@@ -894,7 +894,7 @@ else:
 
             fig_mape.update_layout(
                 title="MAPE",
-                xaxis_title="Model",
+                xaxis_title="Forecast Stage",
                 yaxis_title="MAPE (%)",
                 height=350
             )
@@ -919,7 +919,7 @@ else:
 
             fig_mae.update_layout(
                 title="MAE",
-                xaxis_title="Model",
+                xaxis_title="Forecast Stage",
                 yaxis_title="MAE",
                 height=350
             )
@@ -944,7 +944,7 @@ else:
 
             fig_rmse.update_layout(
                 title="RMSE",
-                xaxis_title="Model",
+                xaxis_title="Forecast Stage",
                 yaxis_title="RMSE",
                 height=350
             )
