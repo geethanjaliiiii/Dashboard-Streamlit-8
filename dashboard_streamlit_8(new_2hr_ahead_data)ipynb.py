@@ -1948,7 +1948,7 @@ if not mape_distribution_df.empty:
 
         fig_2hr_mape_distribution.update_layout(
             height=560,
-            showlegend=True,
+            showlegend=False,
         
             legend=dict(
                 orientation="h",
