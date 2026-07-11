@@ -820,6 +820,16 @@ else:
                     use_container_width=True,
                     key="previous_day_two_hour_actual_gfs"
                 )
+
+
+    st.info(
+    "📌 Evaluation Criteria: All forecast performance metrics are "
+    "computed with "
+    "Actual GHI > 50 W/m². Periods with lower irradiance are excluded "
+    "from evaluation to ensure meaningful assessment under effective "
+    "solar generation conditions."
+)
+    
     # =====================================================
     # CUMULATIVE ERROR METRICS: START DATE TO PREVIOUS DAY
     # =====================================================
