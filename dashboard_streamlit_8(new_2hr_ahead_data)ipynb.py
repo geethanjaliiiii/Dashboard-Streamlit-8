@@ -1698,107 +1698,6 @@ else:
         )
 
 # =====================================================
-# MONTH-WISE OVERALL MAE — DAILY FORECAST
-# =====================================================
-
-monthly_daily_performance, daily_monthly_start, daily_monthly_end = (
-    calculate_monthly_daily_mae(df)
-)
-
-if not monthly_daily_performance.empty:
-
-    st.markdown(
-        f"## 📊 Month-Wise MAE of Daily Forecast "
-        f"({daily_monthly_start} to {daily_monthly_end})"
-    )
-
-    with st.container(border=True):
-
-        fig_monthly_daily = go.Figure()
-
-        fig_monthly_daily.add_trace(go.Bar(
-            x=monthly_daily_performance["Month"],
-            y=monthly_daily_performance["Monthly_MAE"],
-            name="Daily Forecast MAE",
-            marker=dict(
-                color=DAILY_FORECAST_COLOR,
-                line=dict(
-                    color="#B65F00",
-                    width=1.2
-                )
-            ),
-            text=[
-                f"{value:.2f}"
-                for value in monthly_daily_performance["Monthly_MAE"]
-            ],
-            textposition="outside",
-            cliponaxis=False,
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "MAE: %{y:.2f}"
-                "<extra></extra>"
-            )
-        ))
-
-        maximum_daily_mae = (
-            monthly_daily_performance["Monthly_MAE"].max()
-        )
-
-        daily_ymax = (
-            maximum_daily_mae * 1.18
-            if pd.notna(maximum_daily_mae) and maximum_daily_mae > 0
-            else 100
-        )
-
-        fig_monthly_daily.update_layout(
-            xaxis_title="Month",
-            yaxis_title="MAE",
-            height=500,
-            bargap=0.25,
-            showlegend=False,
-            margin=dict(
-                l=45,
-                r=25,
-                t=30,
-                b=55
-            )
-        )
-
-        fig_monthly_daily.update_xaxes(
-            type="category",
-            categoryorder="array",
-            categoryarray=[
-                "Jan", "Feb", "Mar", "Apr",
-                "May", "Jun", "Jul", "Aug",
-                "Sep", "Oct", "Nov", "Dec"
-            ],
-            fixedrange=True
-        )
-
-        fig_monthly_daily.update_yaxes(
-            range=[0, daily_ymax],
-            rangemode="tozero",
-            fixedrange=True
-        )
-
-        st.plotly_chart(
-            fig_monthly_daily,
-            width="stretch",
-            key="monthwise_daily_forecast_mae",
-            config={
-                "displayModeBar": False,
-                "staticPlot": True,
-                "responsive": True
-            }
-        )
-
-else:
-    st.warning(
-        "Not enough valid data is available to calculate "
-        "month-wise Daily Forecast MAE."
-    )
-
-# =====================================================
 # MONTH-WISE OVERALL MAE — 2-HOUR AHEAD FORECAST
 # =====================================================
 
@@ -2032,7 +1931,8 @@ if not mape_distribution_df.empty:
                 "%{percent}"
             ),
 
-            textposition="outside",
+            textposition="auto",
+            automargin=True,
 
             hovertemplate=(
                 "<b>%{label}</b><br>"
@@ -2047,23 +1947,23 @@ if not mape_distribution_df.empty:
         ))
 
         fig_2hr_mape_distribution.update_layout(
-            height=500,
+            height=560,
             showlegend=True,
-
+        
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
-                y=-0.15,
+                y=-0.08,
                 xanchor="center",
                 x=0.5,
                 title="MAPE Range"
             ),
-
+        
             margin=dict(
-                l=70,
-                r=70,
-                t=30,
-                b=90
+                l=90,
+                r=90,
+                t=40,
+                b=130
             )
         )
 
