@@ -1898,3 +1898,188 @@ else:
         "Not enough valid 2-hour-ahead forecast data is available "
         "to calculate month-wise MAE."
     )
+
+# =====================================================
+# DAILY MAPE DISTRIBUTION — 2-HOUR AHEAD FORECAST
+# =====================================================
+
+@st.cache_data
+def calculate_daily_2hr_mape_distribution(input_df):
+
+    distribution_df = input_df.dropna(
+        subset=[
+            "valid_time_ist",
+            "Actual_GHI",
+            "Two_Hour_Ahead_Forecast"
+        ]
+    ).copy()
+
+    distribution_df["hour"] = (
+        distribution_df["valid_time_ist"].dt.hour
+        + distribution_df["valid_time_ist"].dt.minute / 60
+    )
+
+    # Use the same daytime and Actual GHI conditions
+    distribution_df = distribution_df[
+        (distribution_df["hour"] >= 6.5)
+        & (distribution_df["hour"] <= 17.5)
+        & (distribution_df["Actual_GHI"] > 50)
+    ].copy()
+
+    if distribution_df.empty:
+        return pd.DataFrame(), None, None
+
+    # Absolute percentage error for every valid timestamp
+    distribution_df["APE"] = (
+        (
+            distribution_df["Actual_GHI"]
+            - distribution_df["Two_Hour_Ahead_Forecast"]
+        ).abs()
+        / distribution_df["Actual_GHI"]
+    ) * 100
+
+    distribution_df["Date"] = (
+        distribution_df["valid_time_ist"].dt.date
+    )
+
+    # One MAPE value for each day
+    daily_mape_df = (
+        distribution_df
+        .groupby("Date", as_index=False)
+        .agg(
+            Daily_MAPE=("APE", "mean")
+        )
+        .sort_values("Date")
+        .reset_index(drop=True)
+    )
+
+    start_date = daily_mape_df["Date"].min()
+    end_date = daily_mape_df["Date"].max()
+
+    # Keep the three requested categories
+    daily_mape_df = daily_mape_df[
+        daily_mape_df["Daily_MAPE"] >= 1
+    ].copy()
+
+    daily_mape_df["MAPE_Range"] = pd.cut(
+        daily_mape_df["Daily_MAPE"],
+        bins=[1, 5, 10, np.inf],
+        labels=[
+            "1–5%",
+            ">5–10%",
+            ">10%"
+        ],
+        include_lowest=True,
+        right=True
+    )
+
+    category_order = [
+        "1–5%",
+        ">5–10%",
+        ">10%"
+    ]
+
+    distribution_counts = (
+        daily_mape_df["MAPE_Range"]
+        .value_counts()
+        .reindex(category_order, fill_value=0)
+        .rename_axis("MAPE Range")
+        .reset_index(name="Number of Days")
+    )
+
+    return distribution_counts, start_date, end_date
+
+
+# Calculate the distribution
+mape_distribution_df, distribution_start, distribution_end = (
+    calculate_daily_2hr_mape_distribution(df)
+)
+
+if not mape_distribution_df.empty:
+
+    st.markdown(
+        f"## 🥧 Daily MAPE Distribution of 2-Hour Ahead Forecast "
+        f"({distribution_start} to {distribution_end})"
+    )
+
+    with st.container(border=True):
+
+        # Colors intentionally different from the existing
+        # forecast-line colors
+        distribution_colors = [
+            "#7E57C2",  # Purple — 1–5%
+            "#EC407A",  # Pink — >5–10%
+            "#78909C"   # Slate grey — >10%
+        ]
+
+        fig_2hr_mape_distribution = go.Figure()
+
+        fig_2hr_mape_distribution.add_trace(go.Pie(
+            labels=mape_distribution_df["MAPE Range"],
+            values=mape_distribution_df["Number of Days"],
+
+            marker=dict(
+                colors=distribution_colors,
+                line=dict(
+                    color="white",
+                    width=2
+                )
+            ),
+
+            texttemplate=(
+                "<b>%{label}</b><br>"
+                "%{value} days<br>"
+                "%{percent}"
+            ),
+
+            textposition="outside",
+
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Number of days: %{value}<br>"
+                "Percentage: %{percent}"
+                "<extra></extra>"
+            ),
+
+            sort=False,
+            direction="clockwise",
+            pull=[0.02, 0.02, 0.02]
+        ))
+
+        fig_2hr_mape_distribution.update_layout(
+            height=500,
+            showlegend=True,
+
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.15,
+                xanchor="center",
+                x=0.5,
+                title="MAPE Range"
+            ),
+
+            margin=dict(
+                l=70,
+                r=70,
+                t=30,
+                b=90
+            )
+        )
+
+        st.plotly_chart(
+            fig_2hr_mape_distribution,
+            width="stretch",
+            key="daily_2hr_mape_distribution_pie",
+            config={
+                "displayModeBar": False,
+                "staticPlot": True,
+                "responsive": True
+            }
+        )
+
+else:
+    st.warning(
+        "Not enough valid 2-hour-ahead forecast data is available "
+        "to calculate the daily MAPE distribution."
+    )
