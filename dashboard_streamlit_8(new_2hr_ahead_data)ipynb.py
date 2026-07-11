@@ -876,7 +876,7 @@ else:
             fig_mape = go.Figure()
 
             fig_mape.add_trace(go.Bar(
-                x=["Before", "After"],
+                x=["Raw GFS Prediction", "After Daily Forecast"],
                 y=[mape_before, mape_after],
                 text=[round(mape_before, 2), round(mape_after, 2)],
                 textposition="auto",
@@ -901,7 +901,7 @@ else:
             fig_mae = go.Figure()
 
             fig_mae.add_trace(go.Bar(
-                x=["Before", "After"],
+                x=["Raw GFS Prediction", "After Daily Forecast"],
                 y=[mae_before, mae_after],
                 text=[round(mae_before, 2), round(mae_after, 2)],
                 textposition="auto",
@@ -926,7 +926,7 @@ else:
             fig_rmse = go.Figure()
 
             fig_rmse.add_trace(go.Bar(
-                x=["Before", "After"],
+                x=["Raw GFS Prediction", "After Daily Forecast"],
                 y=[rmse_before, rmse_after],
                 text=[round(rmse_before, 2), round(rmse_after, 2)],
                 textposition="auto",
@@ -1070,9 +1070,9 @@ else:
         )
 
         comparison_labels = [
-            "Before\n(GFS)",
-            "After\n(Daily)",
-            "After\n(2-Hour)"
+            "Raw GFS Prediction",
+            "After Daily Forecast",
+            "After 2 Hour Ahead"
         ]
 
         comparison_colors = [
