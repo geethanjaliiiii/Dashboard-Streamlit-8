@@ -1964,3 +1964,229 @@ else:
         "Not enough valid 2-hour-ahead forecast data is available "
         "to calculate the daily MAPE distribution."
     )
+
+# =====================================================
+# INDIVIDUAL MAPE DISTRIBUTION — 2-HOUR AHEAD FORECAST
+# Each valid timestamp is counted separately
+# =====================================================
+
+@st.cache_data
+def calculate_individual_2hr_mape_distribution(input_df):
+
+    distribution_df = input_df.dropna(
+        subset=[
+            "valid_time_ist",
+            "Actual_GHI",
+            "Two_Hour_Ahead_Forecast"
+        ]
+    ).copy()
+
+    distribution_df["hour"] = (
+        distribution_df["valid_time_ist"].dt.hour
+        + distribution_df["valid_time_ist"].dt.minute / 60
+    )
+
+    # Same evaluation conditions used in the dashboard
+    distribution_df = distribution_df[
+        (distribution_df["hour"] >= 6.5)
+        & (distribution_df["hour"] <= 17.5)
+        & (distribution_df["Actual_GHI"] > 50)
+    ].copy()
+
+    if distribution_df.empty:
+        return pd.DataFrame(), None, None, 0
+
+    # Percentage error for every individual timestamp
+    distribution_df["Individual_MAPE"] = (
+        (
+            distribution_df["Actual_GHI"]
+            - distribution_df["Two_Hour_Ahead_Forecast"]
+        ).abs()
+        / distribution_df["Actual_GHI"]
+    ) * 100
+
+    start_date = (
+        distribution_df["valid_time_ist"].dt.date.min()
+    )
+
+    end_date = (
+        distribution_df["valid_time_ist"].dt.date.max()
+    )
+
+    # Classify every timestamp separately
+    distribution_df["MAPE_Range"] = pd.cut(
+        distribution_df["Individual_MAPE"],
+        bins=[
+            0,
+            5,
+            10,
+            15,
+            20,
+            np.inf
+        ],
+        labels=[
+            "0–5%",
+            ">5–10%",
+            ">10–15%",
+            ">15–20%",
+            ">20%"
+        ],
+        include_lowest=True,
+        right=True
+    )
+
+    category_order = [
+        "0–5%",
+        ">5–10%",
+        ">10–15%",
+        ">15–20%",
+        ">20%"
+    ]
+
+    distribution_counts = (
+        distribution_df["MAPE_Range"]
+        .value_counts()
+        .reindex(category_order, fill_value=0)
+        .rename_axis("MAPE Range")
+        .reset_index(name="Number of Predictions")
+    )
+
+    total_predictions = len(distribution_df)
+
+    return (
+        distribution_counts,
+        start_date,
+        end_date,
+        total_predictions
+    )
+
+
+# =====================================================
+# CALCULATE INDIVIDUAL DISTRIBUTION
+# =====================================================
+
+(
+    individual_mape_distribution_df,
+    individual_distribution_start,
+    individual_distribution_end,
+    total_individual_predictions
+) = calculate_individual_2hr_mape_distribution(df)
+
+
+if not individual_mape_distribution_df.empty:
+
+    st.markdown(
+        f"## Individual MAPE Distribution of 2-Hour Ahead Forecast "
+        f"({individual_distribution_start} to "
+        f"{individual_distribution_end})"
+    )
+
+    with st.container(border=True):
+
+        # Colours kept separate from the forecast-series colours
+        distribution_colors = [
+            "#5E35B1",  # Deep purple
+            "#8E67C7",  # Light purple
+            "#EC407A",  # Pink
+            "#AB47BC",  # Violet
+            "#78909C"   # Slate grey
+        ]
+
+        fig_individual_mape_distribution = go.Figure()
+
+        fig_individual_mape_distribution.add_trace(
+            go.Pie(
+                labels=individual_mape_distribution_df[
+                    "MAPE Range"
+                ],
+                values=individual_mape_distribution_df[
+                    "Number of Predictions"
+                ],
+
+                hole=0.44,
+
+                marker=dict(
+                    colors=distribution_colors,
+                    line=dict(
+                        color="white",
+                        width=2.5
+                    )
+                ),
+
+                texttemplate=(
+                    "<b>%{label}</b><br>"
+                    "%{value} predictions<br>"
+                    "%{percent:.1%}"
+                ),
+
+                textposition="auto",
+
+                insidetextfont=dict(
+                    size=14,
+                    color="white"
+                ),
+
+                hovertemplate=(
+                    "<b>%{label}</b><br>"
+                    "Predictions: %{value}<br>"
+                    "Share: %{percent:.2%}"
+                    "<extra></extra>"
+                ),
+
+                sort=False,
+                direction="clockwise",
+                pull=[0.035, 0, 0, 0, 0],
+                automargin=True
+            )
+        )
+
+        # Total number of individual predictions in the centre
+        fig_individual_mape_distribution.update_layout(
+            height=580,
+            showlegend=False,
+
+            annotations=[
+                dict(
+                    text=(
+                        f"<b>{total_individual_predictions}</b><br>"
+                        "<span style='font-size:13px;'>"
+                        "Predictions"
+                        "</span>"
+                    ),
+                    x=0.5,
+                    y=0.5,
+                    showarrow=False,
+                    align="center",
+                    font=dict(size=24)
+                )
+            ],
+
+            margin=dict(
+                l=65,
+                r=65,
+                t=40,
+                b=65
+            ),
+
+            uniformtext=dict(
+                minsize=10,
+                mode="hide"
+            )
+        )
+
+        st.plotly_chart(
+            fig_individual_mape_distribution,
+            width="stretch",
+            key="individual_2hr_mape_distribution",
+            config={
+                "displayModeBar": False,
+                "staticPlot": True,
+                "responsive": True
+            }
+        )
+
+else:
+    st.warning(
+        "Not enough valid 2-hour-ahead forecast data is "
+        "available to calculate the individual MAPE distribution."
+    )
