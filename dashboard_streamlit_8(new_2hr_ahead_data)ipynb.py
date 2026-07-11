@@ -2076,7 +2076,7 @@ def calculate_individual_2hr_mape_distribution(input_df):
 if not individual_mape_distribution_df.empty:
 
     st.markdown(
-        f"## Individual MAPE Distribution of 2-Hour Ahead Forecast "
+        f"## MAPE Distribution of 2-Hour Ahead Forecast "
         f"({individual_distribution_start} to "
         f"{individual_distribution_end})"
     )
