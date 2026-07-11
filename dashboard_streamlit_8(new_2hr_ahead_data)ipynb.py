@@ -1838,15 +1838,11 @@ def calculate_daily_2hr_mape_distribution(input_df):
     end_date = daily_mape_df["Date"].max()
 
     # Keep the three requested categories
-    daily_mape_df = daily_mape_df[
-        daily_mape_df["Daily_MAPE"] >= 1
-    ].copy()
-
     daily_mape_df["MAPE_Range"] = pd.cut(
         daily_mape_df["Daily_MAPE"],
-        bins=[1, 5, 10, np.inf],
+        bins=[0, 5, 10, np.inf]
         labels=[
-            "1–5%",
+            "0–5%",
             ">5–10%",
             ">10%"
         ],
@@ -1855,7 +1851,7 @@ def calculate_daily_2hr_mape_distribution(input_df):
     )
 
     category_order = [
-        "1–5%",
+        "0–5%",
         ">5–10%",
         ">10%"
     ]
