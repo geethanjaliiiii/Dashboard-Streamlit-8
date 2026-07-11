@@ -1611,13 +1611,7 @@ else:
                                 "Actual vs GFS",
                                 f"{mape_gfs:.2f}%",
                                 GFS_COLOR,
-                                "1.30rem"
-                            ),
-                            (
-                                "Actual vs Daily Forecast",
-                                f"{mape_daily:.2f}%",
-                                DAILY_FORECAST_COLOR,
-                                "1.70rem"
+                                "1.40rem"
                             ),
                             (
                                 "Actual vs 2-Hour Ahead",
@@ -1637,13 +1631,7 @@ else:
                                 "Actual vs GFS",
                                 f"{mae_gfs:.2f}",
                                 GFS_COLOR,
-                                "1.30rem"
-                            ),
-                            (
-                                "Actual vs Daily Forecast",
-                                f"{mae_daily:.2f}",
-                                DAILY_FORECAST_COLOR,
-                                "1.70rem"
+                                "1.40rem"
                             ),
                             (
                                 "Actual vs 2-Hour Ahead",
@@ -1663,13 +1651,7 @@ else:
                                 "Actual vs GFS",
                                 f"{rmse_gfs:.2f}",
                                 GFS_COLOR,
-                                "1.30rem"
-                            ),
-                            (
-                                "Actual vs Daily Forecast",
-                                f"{rmse_daily:.2f}",
-                                DAILY_FORECAST_COLOR,
-                                "1.70rem"
+                                "1.40rem"
                             ),
                             (
                                 "Actual vs 2-Hour Ahead",
